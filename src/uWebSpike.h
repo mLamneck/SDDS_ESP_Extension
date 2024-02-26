@@ -20,7 +20,7 @@ class TwebSocketClientContext : public TstringStream{
     bool isClient(AsyncWebSocketClient* _client) { return _client == Fclient; }
     bool hasSameIp(AsyncWebSocketClient* _client) { 
       if (!Fclient){
-        Serial.println("TwebSocketClientContext.hasSameIp: Fclient=nil");
+        //Serial.println("TwebSocketClientContext.hasSameIp: Fclient=nil");
         return false;
       }
       return _client->remoteIP() == Fclient->remoteIP(); 
@@ -100,7 +100,7 @@ class TwebSocket : public AsyncWebSocket{
     }
 
     TpWebSocketClientContext rejectClient(AsyncWebSocketClient* _client, const char* _error){
-      Serial.println(_error);
+      //Serial.println(_error);
       _client->text(_error);
       _client->close();
       return nullptr;
@@ -166,10 +166,12 @@ class TwebSocket : public AsyncWebSocket{
     void _onEvent(AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
         if (!client) return;
 		
+		/*
 		Serial.print(millis());
         Serial.print(" in WebSocket.onEvent taskName= ");
         Serial.println(pcTaskGetName( nullptr ));
-
+		*/
+		
         switch (type) {
           case WS_EVT_CONNECT:
             doOnClientConnect(client);
