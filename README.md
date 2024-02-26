@@ -2,7 +2,6 @@
 This is an extension from the [SDDS core library](https://github.com/mLamneck/SDDS) core library. It introduces some ESP specific functionalities like Web Spikes.
 
 ## Table of contents
-- [Why to use this library](#why-to-use-this-library)
 - [Installation](#installation)
   - [Arduino](#arduino)
   - [PlatformIO](#platformio)
