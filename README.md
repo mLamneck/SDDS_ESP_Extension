@@ -28,7 +28,7 @@ The WebSpike is using the **ESPAsyncWebServer** library from [me-no-dev](https:/
 ### Arduino
 This library uses the following libraries which have to be installed first when using Arduino IDE.
 
- 1. [SDDS core library](https://github.com/mLamneck/SDDS)
+ 1. [SDDS Core Library](https://github.com/mLamneck/SDDS)
  2. [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
  3. Clone this repository in your library folder and you are ready to go.
 
