@@ -11,7 +11,7 @@ The WebSpike is using the **ESPAsyncWebServer** library from [me-no-dev](https:/
   - [PlatformIO](#platformio)
 - [Web Spike](#webspike)
   - [Introducing the User Interface](#introducing-the-user-interface)
-  - [Navigate through the Tree on mobile devices](#navigate-through-the-tree-on-mobile-devices)
+  - [Navigate through the tree on mobile devices](#navigate-through-the-tree-on-mobile-devices)
   - [Navigate through the tree on Desktops](#navigate-through-the-tree-on-desktops)
   - [Connect to the Access Point](#connect-to-the-access-point)
 - [Wifi Manager](#wifimanager)
@@ -58,7 +58,7 @@ Like mentioned in the [SDDS Core library](https://github.com/mLamneck/SDDS?tab=r
 
 If you read something like set ```led.onTime=500``` in this documentation, we mean you follow the green line in the illustration enter a value of 500 and accept the change.
 
-#### Navigate through the Tree on mobile devices
+#### Navigate through the tree on mobile devices
 When you browse the Website you will first see the picture on the left. We think the usage is self explainatory but here are some guidelines.
 * Each variable in you tree is represented by 2 columns with the name in the left and the value in the right.
 * For readonly variables, the font color in the right column is gray instead of black and the value can not be edited.
