@@ -16,15 +16,15 @@
     #define WIFI_MANAGER_AP_PW "Start1234" 
 #endif
 
-sdds_enum(no,yes) TwifiSwitch;
+sdds_enum(___,connect) TwifiAction;
 sdds_enum(STA,AP) TwifiMode;
-sdds_enum(connect,waitConnect,connected,fallback,idle) TwifiStatus;
+sdds_enum(connect,waitConnect,connected,fallback) TwifiStatus;
 
 class TwifiManager : public TmenuHandle{
     Ttimer timer;
     public:
         sdds_struct(
-            sdds_var(TwifiSwitch,enabled,sdds::opt::saveval,TwifiSwitch::e::yes)
+            sdds_var(TwifiAction,action)
             sdds_var(TwifiStatus,status,sdds::opt::readonly)
             sdds_var(Tuint8,checkCnt,sdds::opt::readonly);
             sdds_var(TwifiMode,currMode,sdds::opt::readonly)
@@ -44,38 +44,38 @@ class TwifiManager : public TmenuHandle{
             ip = WiFi.softAPIP().toString();
         };
 
-        void createAP(){createAP(ssid.value().c_str(),password.value().c_str());}
+        void createAP(){createAP(ssid,password);}
+
         void createFallbackAP(){ 
             status = TwifiStatus::e::fallback;
             createAP(WIFI_MANAGER_AP_SSID,WIFI_MANAGER_AP_PW); 
         }
+
         virtual void connect(){
             if (status == TwifiStatus::e::fallback) 
                 WiFi.softAPdisconnect();
             currMode = TwifiMode::e::STA;
             WiFi.disconnect();
             WiFi.persistent(false);
-            WiFi.setHostname(hostname.to_string().c_str());
-            WiFi.begin(ssid.value().c_str(), password.value().c_str());
+            WiFi.setHostname(hostname.c_str());
+            WiFi.begin(ssid.c_str(), password.c_str());
             WiFi.mode(WIFI_STA);
         }
-        virtual void disconnect(){ WiFi.disconnect(); }
+
         virtual bool connected(){ return (WiFi.status() == WL_CONNECTED); }
 
+        virtual void disconnect(){ WiFi.disconnect(); }
+        
         TwifiManager(){
             on(sdds::setup()){
                 WiFi.begin();
             };
             
-            on(enabled){
-                if (enabled==TwifiSwitch::e::yes){
+            on(action){
+                if (action==TwifiAction::e::connect){
                     status = TwifiStatus::e::connect;
                     timer.start(100);
-                }
-                else {
-                    disconnect();
-                    status = TwifiStatus::e::idle;
-                    timer.stop();
+                    action = TwifiAction::e::___;
                 }
             };
 
@@ -83,7 +83,7 @@ class TwifiManager : public TmenuHandle{
             on(timer){
                 switch(status){
                     case TwifiStatus::e::connect: case TwifiStatus::e::fallback:
-                        if ((ssid.value().length() > 0) && (password.value().length()>0))
+                        if ((ssid.length() > 0) && (password.length()>0))
                             if (mode==TwifiMode::e::STA){
                                 connect();
                                 checkCnt = 0;
