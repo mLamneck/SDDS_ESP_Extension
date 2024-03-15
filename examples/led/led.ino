@@ -23,8 +23,8 @@ class Tled : public TmenuHandle{
           pinMode(LED_BUILTIN, OUTPUT);
 
           on(ledSwitch){
-              if (ledSwitch == TonOffState::dtype::ON) digitalWrite(LED_BUILTIN,1);
-              else digitalWrite(LED_BUILTIN,0);
+              if (ledSwitch == TonOffState::dtype::ON) digitalWrite(LED_BUILTIN,0);
+              else digitalWrite(LED_BUILTIN,1);
           };
 
           on(blinkSwitch){
@@ -46,6 +46,7 @@ class Tled : public TmenuHandle{
 };
 
 class TuserStruct : public TmenuHandle{
+  public:
     sdds_struct(
         sdds_var(Tled,led,sdds::opt::saveval)
         sdds_var(TparamSaveMenu,params)
