@@ -36,7 +36,7 @@ class TwifiManager : public TmenuHandle{
         )
 
     protected:
-        virtual void createAP(const char* _ssid, const char* _pw){
+        void createAP(const char* _ssid, const char* _pw){
             currMode = TwifiMode::e::AP;
             disconnect();
             WiFi.mode(WIFI_AP);
@@ -96,7 +96,10 @@ class TwifiManager : public TmenuHandle{
                     case TwifiStatus::e::waitConnect:
                         timer.start(1000);
                         checkCnt = checkCnt+1;
-                        if (connected()) status = TwifiStatus::e::connected;
+                        if (connected()){
+                            ip = WiFi.localIP().toString();
+                            status = TwifiStatus::e::connected;
+                        }
                         else if (checkCnt >= 10){
                             //create fallback if no connection has been established with the
                             //provided credentials and try to connect again after 5 minutes
