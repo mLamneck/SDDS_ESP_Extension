@@ -12,8 +12,8 @@ class TwebSocketClientContext : public TstringStream{
     TwebSocketClientContext(TmenuHandle* _ds, TstringStreamBuffer& _buffer, 
       AsyncWebSocketClient* _client) 
       : TstringStream(&_buffer)
-      , FcommHandler(_ds,this)
       , Fclient(_client)
+      , FcommHandler(_ds,this)
     {
     }    
 
