@@ -19,7 +19,6 @@
     "dependencies":[
       { "name":"ESP8266WiFi", "platforms":"espressif8266" },
       { "name":"WiFi", "platforms":"espressif32" },
-      { "name":"EEPROM", "platforms":["espressif32","espressif8266"] },	  
       { "name":"FS", "platforms":"espressif32" },
       { "name":"AsyncTCP", "owner": "me-no-dev"},
       { "name":"ESP Async WebServer", "owner": "me-no-dev", "version" : "^1.2.3"},
