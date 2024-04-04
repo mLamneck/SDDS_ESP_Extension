@@ -17,8 +17,8 @@ The WebSpike is using the **ESPAsyncWebServer** library from [me-no-dev](https:/
   - [Connect to the Access Point](#connect-to-the-access-point)
 - [Wifi Manager](#wifi-manager)
   - [What is a WiFi Manager](#what-is-a-wifi-manager)
-  - [How Does Our Wifi Manager Work](#how-does-our-wifi-manager-work)
-  - [Using the Wifi Manager](#using-the-wifi-manager)
+  - [How Does Our Wifi Manager Work](#how-does-our-wifimanager-work)
+  - [Using the Wifi Manager](#using-the-wifimanager)
   - [Coding a Full-Featured Wifi Manager in 120 Lines](#coding-a-full-featured-wifi-manager-in-120-lines)
     - [Declaring the Data Structure](#declaring-the-data-structure)
     - [Implementing the Functionality](#implementing-the-functionality)
@@ -129,6 +129,7 @@ Using our WiFi Manager is straightforward. Just include ```uWifiManager.h``` and
 #include "uWifiManager.h"
 
 class TuserStruct : public TmenuHandle{
+  public:
     sdds_struct(
         sdds_var(TparamSaveMenu,params)
         sdds_var(TwifiManager,wifi)
