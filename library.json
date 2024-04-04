@@ -17,11 +17,7 @@
     "frameworks": "arduino",
     "platforms": ["espressif8266", "espressif32"],
     "dependencies":[
-      { "name":"ESP8266WiFi", "platforms":"espressif8266" },
-      { "name":"WiFi", "platforms":"espressif32" },
-      { "name":"FS", "platforms":"espressif32" },
-      { "name":"AsyncTCP", "owner": "me-no-dev"},
-      { "name":"ESP Async WebServer", "owner": "me-no-dev", "version" : "^1.2.3"},
+      { "name":"ESP Async WebServer", "owner": "me-no-dev", "platforms": [ "espressif32", "espressif8266" ], "version" : "^1.2.3"},
       { "name":"SDDS", "version": "https://github.com/mLamneck/SDDS"}
     ]
 }
