@@ -129,6 +129,7 @@ Using our WiFi Manager is straightforward. Just include ```uWifiManager.h``` and
 #include "uWifiManager.h"
 
 class TuserStruct : public TmenuHandle{
+  public:
     sdds_struct(
         sdds_var(TparamSaveMenu,params)
         sdds_var(TwifiManager,wifi)
