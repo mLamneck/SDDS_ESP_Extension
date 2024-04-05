@@ -8,7 +8,7 @@ The WebSpike is using the **ESPAsyncWebServer** library from [me-no-dev](https:/
 
 ## Table of Contents
 - [Installation](#installation)
-  - [Arduino](#arduino)
+  - [Arduino IDE](#arduino-ide)
   - [PlatformIO](#platformio)
 - [Web Spike](#web-spike)
   - [Introducing the User Interface](#introducing-the-user-interface)
@@ -25,7 +25,7 @@ The WebSpike is using the **ESPAsyncWebServer** library from [me-no-dev](https:/
 
 ## Installation
 
-### Arduino
+### Arduino IDE
 This library uses the following libraries, which have to be installed first when using Arduino IDE:
 
  1. [SDDS Core Library](https://github.com/mLamneck/SDDS)
@@ -33,15 +33,25 @@ This library uses the following libraries, which have to be installed first when
  3. Clone this repository into your library folder, and you are ready to go.
 
 ### PlatformIO
-Add the GitHub link to this repository as a lib dependency to your platformio.ini file, as shown in the following example:
+[PlatformIO](http://platformio.org) is an open source ecosystem for IoT development with cross platform build system, library manager and full support for Espressif ESP8266/ESP32 development. It works on the popular host OS: Mac OS X, Windows, Linux 32/64, Linux ARM (like Raspberry Pi, BeagleBone, CubieBoard).
 
-```
-[env:myEspEnv]
-platform = espressif32
-board = esp32dev
+1. Install [PlatformIO IDE](http://platformio.org/platformio-ide)
+2. Create new project using "PlatformIO Home > New Project"
+3. Add "SDDS_ESP_Extension" to project using [Project Configuration File `platformio.ini`](http://docs.platformio.org/page/projectconf.html) and [lib_deps](http://docs.platformio.org/page/projectconf/section_env_library.html#lib-deps) option:
+
+```ini
+[env:d1_mini_lite]
+platform = espressif8266
+board = d1_mini_lite
 framework = arduino
-lib_deps = https://github.com/mLamneck/SDDS_ESP_Extension
+lib_deps = https://github.com/mLamneck/SDDS_ESP_Extension.git
 ```
+ 4. Happy coding with PlatformIO!
+
+#### Coding with PlatformIO
+We provide some useful snippets to further speed up your development process and avoid typing errors. Just place the file [code snippets](examples/PlatformIO/led/.vscode/sdds.code-snippets) in your `.vscode` folder.
+
+![Alt Text](assets/sddsSnippets.gif)
 
 ## WebSpike
 The Web Spike actually does two things:
@@ -106,7 +116,7 @@ Our implementation is a bit more sophisticated:
 2. Credentials stored?
     1. Try to connect.
     2. Connected?
-       1. Check if still connected every minute, and if not, go to step 3.
+       1. Check if still connected every minute, and if not, go to step 2.1
     3. Not connected?
        1. Create an Access Point with a website to configure it.
        2. After 5 minutes, go to 2.1.
