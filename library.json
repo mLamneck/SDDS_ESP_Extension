@@ -17,7 +17,7 @@
     "frameworks": "arduino",
     "platforms": ["espressif8266", "espressif32"],
     "dependencies":[
-      { "name":"ESP Async WebServer", "owner": "me-no-dev", "platforms": [ "espressif32", "espressif8266" ], "version" : "^1.2.3"},
+      { "name":"ESP Async WebServer", "owner": "me-no-dev", "platforms": [ "espressif32", "espressif8266" ], "version" : "https://github.com/me-no-dev/ESPAsyncWebServer.git"},
       { "name":"SDDS", "version": "https://github.com/mLamneck/SDDS"}
     ]
 }
