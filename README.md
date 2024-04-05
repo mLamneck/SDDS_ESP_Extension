@@ -10,6 +10,7 @@ The WebSpike is using the **ESPAsyncWebServer** library from [me-no-dev](https:/
 - [Installation](#installation)
   - [Arduino IDE](#arduino-ide)
   - [PlatformIO](#platformio)
+    - [Coding with PlatformIO](#coding-with-platformio)
 - [Web Spike](#web-spike)
   - [Introducing the User Interface](#introducing-the-user-interface)
   - [Navigate through the Tree on Mobile Devices](#navigate-through-the-tree-on-mobile-devices)
@@ -51,7 +52,9 @@ lib_deps = https://github.com/mLamneck/SDDS_ESP_Extension.git
 #### Coding with PlatformIO
 We provide some useful snippets to further speed up your development process and avoid typing errors. Just place the file [code snippets](examples/PlatformIO/led/.vscode/sdds.code-snippets) in your `.vscode` folder.
 
-![Alt Text](assets/sddsSnippets.gif)
+<p align="center">
+  <img src="assets/sddsSnippets.gif">
+</p>
 
 ## WebSpike
 The Web Spike actually does two things:
