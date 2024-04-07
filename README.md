@@ -79,7 +79,7 @@ When you browse the website, you will first see the picture on the left. We thin
 * For non-struct variables, you can change the value by clicking in the right column with the current value. This will open up the soft keyboard or select dialog if it's an enum.
 
 #### Navigate through the tree on Desktops
-With a keyboard available, you can navigate through the tree using the arrow keys. Use the up and down arrows to select the current row indicated by the blue line below the name. Use the right key to navigate into substructures or start entering a value. Pressing the left key in the right column stops the editing process. Pressing the left key in the right column navigates back to the parent struct. While editing a value, pressing Enter accepts the value, and pressing Escape cancels the editing process.
+With a keyboard available, you can navigate through the tree using the arrow keys. Use the up and down arrows to select the current row indicated by the blue line below the name. Use the right key to navigate into substructures or start entering a value. Pressing the left key in the right column stops the editing process. Pressing the left key in the left column navigates back to the parent struct. While editing a value, pressing Enter accepts the value, and pressing Escape cancels the editing process.
 
 ### Connect to the Access Point
 After flashing the code, the ESP will open an Access Point with the following credentials:
@@ -107,7 +107,7 @@ ESP boards are amazing, and connecting them to a router is fairly easy. However,
 
 * First of all, we don't like to be dependent on other libraries if not necessary.
 * Second, the implementation of the logic is straightforward, and we wouldn't even consider searching for a library.
-* Third, and most importantly, we use it as another example to prove our statement from the [SDDS Core Library](https://github.com/mLamneck/SDDS?tab=readme-ov-file#why-to-use-this-library) and show once more how you can tremendously speed up your development process and how even beginners are able to do advanced stuff like a WifiManager. Check out our A full-featured WiFi Manager chapter in 120 lines [chapter](#coding-a-full-featured-wifi-manager-in-120-lines) if this sounds interesting.
+* Third, and most importantly, we use it as another example to prove our statement from the [SDDS Core Library](https://github.com/mLamneck/SDDS?tab=readme-ov-file#why-to-use-this-library) and show once more how you can tremendously speed up your development process and how even beginners are able to do advanced stuff like a WifiManager. Check out our A full-featured WiFi Manager chapter in 120 lines [here](#coding-a-full-featured-wifi-manager-in-120-lines) if this sounds interesting.
 
 ### How does our WifiManager work?
 
@@ -167,6 +167,8 @@ void loop(){
 #### Testing the WiFi Manager
 You can use the [LED example code](examples/led/led.ino) in order to try it.
 
+If you want to use platformIO, you can download the full application from [here](/examples/platformIO/led/).
+
 ### Coding a Full-Featured WiFi Manager in 120 Lines
 #### Prerequisites
 In order to follow along, it's beneficial to be familiar with the basics of the [SDDS Core library](https://github.com/mLamneck/SDDS?tab=readme-ov-file#documentation). But we think it's still possible to understand it right away and read some stuff on demand. Just try it yourself as you like.
@@ -189,9 +191,7 @@ Let's have a look at what's necessary to create a WiFi Manager.
 3. **Save the Data to Non-Volatile Memory**
     * Use EEPROM or SPIFFS.
 
-Obviously part 2 is the biggest and requires the most knowledge. For sure it's overwhelming for beginners, and even advanced developers won't do it in 30 minutes. And finally, you have to accomplish step 3 and test everything, which is not to underestimate as well.
-
-Reading over the list, with the goal in mind, I get in a bad mood and I wouldn't even start. So much effort for such a simple task!? Let's see if we can do it less painfully with SDDS.
+Obviously part 2 is the biggest and requires the most knowledge. For sure it's overwhelming for beginners, and even advanced developers won't do it in 30 minutes. And finally, you have to accomplish step 3 and test everything, which is not to underestimate as well. Let's see if we can do it less painfully with SDDS.
 
 #### Declaring the Data Structure
 
@@ -207,7 +207,7 @@ class TwifiManager : public TmenuHandle{
         sdds_struct(
             sdds_var(TwifiAction,action)
             sdds_var(TwifiStatus,status,sdds::opt::readonly)
-            sdds_var(Tuint8,checkCnt,sdds::opt::readonly);
+            sdds_var(Tuint8,checkCnt,sdds::opt::readonly)
             sdds_var(TwifiMode,currMode,sdds::opt::readonly)
             sdds_var(TwifiMode,mode)
             sdds_var(Tstring,ip,sdds::opt::readonly)
@@ -321,4 +321,4 @@ case TwifiStatus::e::connected:
 
 Here, we are checking every minute if we are still connected, and if not, we set the state back to **connect** to start all over again. The **connected** state is necessary because the auto-reconnect feature of the ESP is still not reliable, and we have to manage it on our own.
 
-And that's it! We just have to implement a few functions that will contain the code you are most likely familiar with. Check out the full code in the [source file](src/uWifiManager.h). How amazing is that? No need to know about HTML, CSS, JavaScript, websockets, and all the stuff that actually has nothing to do with what we wanted to implement. You get it for free. That's the beauty of SDDS. We hope that after seeing the real-world example, you see the benefits as clearly as we do.
+And that's it! We just have to implement a few functions that will contain the code you are most likely familiar with. Check out the full code in the [source file](src/uWifiManager.h). No need to know about HTML, CSS, JavaScript, websockets, and all the stuff that actually has nothing to do with what we wanted to implement. You get it for free. That's the beauty of SDDS. We hope that after seeing the real-world example, you see the benefits as clearly as we do.
