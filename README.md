@@ -221,7 +221,10 @@ class TwifiManager : public TmenuHandle{
 ```
 This will look like the following in the user interface provided by the WebSpike. Note that this is not a fixed thing that we did behind the scenes; it is created based on the structure you have defined above, so adding variables in the above struct will add it in the UI without any further doing.
 
+<div align="center">
+
 ![WiFi menu](assets/Wifi.jpg)
+</div>
 
 Most of the variables are self-explanatory, but some might not be:
 * action
