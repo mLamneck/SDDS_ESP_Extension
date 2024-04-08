@@ -47,7 +47,7 @@ board = d1_mini_lite
 framework = arduino
 lib_deps = https://github.com/mLamneck/SDDS_ESP_Extension.git
 ```
-4. PlatformIO has a built-in serial monitor. However, it's missing the ability to send messages so far. If you want to use it as you are used to in Arduino IDE, you can install [this].
+4. PlatformIO has a built-in serial monitor. However, it's missing the ability to send messages so far. If you want to use it as you are used to in Arduino IDE, you can install [this](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-serial-monitor).
 
 5. Happy coding with PlatformIO!
 
