@@ -52,7 +52,7 @@ lib_deps = https://github.com/mLamneck/SDDS_ESP_Extension.git
 5. Happy coding with PlatformIO!
 
 #### Coding with PlatformIO
-We provide some useful snippets to further speed up your development process and avoid typing errors. Just place the file [code snippets](examples/PlatformIO/led/.vscode/sdds.code-snippets) in your `.vscode` folder.
+We provide some useful snippets to further speed up your development process and avoid typing errors. Just place the file [code snippets](examples/platformIO/led/.vscode/sdds.code-snippets) in your `.vscode` folder.
 
 <p align="center">
   <img src="assets/sddsSnippets.gif">
