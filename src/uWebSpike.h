@@ -205,6 +205,11 @@ class TwebSpike : public Tthread{
     void begin();
 
     void execute(Tevent* _ev) override{
+      /* 
+      without the next line we got some strange errors and reboots in some cases:
+          assert failed: tcpip_api_call IDF/components/lwip/lwip/src/api/tcpip.c:497 (Invalid mbox)
+      */
+      esp_netif_init();
       begin();
     }
 
