@@ -29,7 +29,7 @@ void TwebSpike::begin(){
   FwebSocket.init(FwebServer);
   
   FwebServer.route("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", site_browser, sizeof(site_browser));
+    AsyncWebServerResponse *response = request->beginResponse(200, "text/html", site_browser, sizeof(site_browser));
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });  

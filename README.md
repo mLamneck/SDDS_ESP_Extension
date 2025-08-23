@@ -145,10 +145,9 @@ Using our WiFi Manager is straightforward. Just include ```uWifiManager.h``` and
 
 class TuserStruct : public TmenuHandle{
   public:
-    sdds_struct(
-        sdds_var(TparamSaveMenu,params)
-        sdds_var(TwifiManager,wifi)
-    )
+    sdds_var(TparamSaveMenu,params)
+    sdds_var(TwifiManager,wifi)
+
     TuserStruct(){
         //you application code goes here... 
     }
@@ -206,18 +205,17 @@ sdds_enum(connect,waitConnect,connected,fallback) TwifiStatus;
 class TwifiManager : public TmenuHandle{
     Ttimer timer;
     public:
-        sdds_struct(
-            sdds_var(TwifiAction,action)
-            sdds_var(TwifiStatus,status,sdds::opt::readonly)
-            sdds_var(Tuint8,checkCnt,sdds::opt::readonly)
-            sdds_var(TwifiMode,currMode,sdds::opt::readonly)
-            sdds_var(TwifiMode,mode)
-            sdds_var(Tstring,ip,sdds::opt::readonly)
-            sdds_var(Tstring,ssid,sdds::opt::saveval)
-            sdds_var(Tstring,password,sdds::opt::saveval)
-            sdds_var(Tstring,hostname,sdds::opt::saveval)
-        )
-        TwifiManager(){
+		sdds_var(TwifiAction,action)
+		sdds_var(TwifiStatus,status,sdds::opt::readonly)
+		sdds_var(Tuint8,checkCnt,sdds::opt::readonly)
+		sdds_var(TwifiMode,currMode,sdds::opt::readonly)
+		sdds_var(TwifiMode,mode)
+		sdds_var(Tstring,ip,sdds::opt::readonly)
+		sdds_var(Tstring,ssid,sdds::opt::saveval)
+		sdds_var(Tstring,password,sdds::opt::saveval)
+		sdds_var(Tstring,hostname,sdds::opt::saveval)
+
+		TwifiManager(){
           //logic goes here
         }
 ```
@@ -255,10 +253,10 @@ The ```on(sdds::setup()){...}``` is basically equivalent to the ```setup(){...}`
 Ok, let's continue with the logic for the ```enabled``` switch:
 ```C++
 on(action){
-    if (action==TwifiAction::e::connect){
-        status = TwifiStatus::e::connect;
+    if (action==TwifiAction::connect){
+        status = TwifiStatus::connect;
         timer.start(100);
-        action = TwifiAction::e::___;
+        action = TwifiAction::___;
     }
 };
 ```
@@ -269,12 +267,12 @@ Let's continue with the first of the 3 states in our state machine: the **connec
 timer.start(100);
 on(timer){
     switch(status){
-        case TwifiStatus::e::connect: case TwifiStatus::e::fallback:
+        case TwifiStatus::connect: case TwifiStatus::fallback:
             if ((ssid.length() > 0) && (password.length()>0))
-                if (mode==TwifiMode::e::STA){
+                if (mode==TwifiMode::STA){
                     connect();
                     checkCnt = 0;
-                    status = TwifiStatus::e::waitConnect;
+                    status = TwifiStatus::waitConnect;
                     timer.start(500);
                 } else createAP();                        //create AP with given credentials
             else createFallbackAP();                      //create fallbackAP if credentials are not set
@@ -294,10 +292,10 @@ This can be read like this:
 The next state is **waitConnect**:
 ```C++
 //...
-case TwifiStatus::e::waitConnect:
+case TwifiStatus::waitConnect:
     timer.start(1000);
     checkCnt = checkCnt+1;
-    if (connected()) status = TwifiStatus::e::connected;
+    if (connected()) status = TwifiStatus::connected;
     else if (checkCnt >= 10){
         //create fallback if no connection has been established with the
         //provided credentials and try to connect again after 5 minutes
@@ -313,10 +311,10 @@ This is what we want. If you turn your WiFi off during nighttime, it will try to
 
 If we are finally connected, we switch the state to connected, the final state is **connected**:
 ```C++
-case TwifiStatus::e::connected:
+case TwifiStatus::connected:
     if (connected()) timer.start(60000);
     else {
-        status = TwifiStatus::e::connect;
+        status = TwifiStatus::connect;
         timer.start(100);
     }
 ```
