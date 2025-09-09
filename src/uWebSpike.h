@@ -1,13 +1,90 @@
 #ifndef UWEBSPIKE_H
 #define UWEBSPIKE_H
 
+#if defined(ESP32)
+#define SDDS_WEBSPIKE_SYNC 1
+#endif
+
 #include "uPlainCommHandler.h"
 #include "uWebServer.h"
+#include "uMultask.h"
+#include "uMemoryUtils.h"
+#include <vector>
+
+#if SDDS_WEBSPIKE_SYNC
+/**
+ * @brief WebSocket events must be processed synchronously.
+ * On RTOS-based platforms we therefore enqueue server events
+ * for later handling in the main task context.
+ * 
+ * Elements in the queue are TwsEvent
+ */
+class TwsEvent {
+		union{
+			AwsFrameInfo awsInfo;
+		} Farg;
+		std::vector<uint8_t> Fdata;
+	public:
+		AwsEventType type;
+		uint32_t clientId;
+
+		TwsEvent() = default;
+
+		TwsEvent(AsyncWebSocketClient *_client, AwsEventType _type, void* _arg, uint8_t *_data, size_t len){
+			type = _type;
+			if (type == WS_EVT_DATA){
+				Farg.awsInfo = *(AwsFrameInfo*)_arg;
+			}
+			clientId = _client->id();
+			Fdata.assign(_data, _data + len);
+			Fdata.push_back(0);
+		}
+
+		uint8_t* data(){ return Fdata.data(); }
+		size_t len() { return Fdata.size() - 1; }
+
+		void* arg(){
+			if (type == WS_EVT_DATA) return &Farg.awsInfo;
+			return nullptr;
+		}
+};
+
+/**
+ * @brief Ringbuffer to enqueue server events
+ * for later handling in the main task context.
+ */
+template <class T, int SIZE>
+class TsyncedQueue{
+		sdds::memUtils::TringBuffer<T,SIZE> Fq;
+	public:
+		TisrEvent SyncEvent;
+
+		bool hasData(){ return !Fq.isEmpty(); }
+
+		T read(){
+			return Fq.read();
+		}
+
+		bool write(T* d){
+			bool res = Fq.write(*d);
+			SyncEvent.signal();
+			return res;
+		}
+};
+
+typedef TsyncedQueue<TwsEvent,10> TwebSpikeQ;
+
+#endif
+
+class TwebsocketPlainComm : public TplainCommHandler{
+	public:
+		using TplainCommHandler::TplainCommHandler;
+};
 
 class TwebSocketClientContext : public TstringStream{
   private:
     AsyncWebSocketClient* Fclient;
-    TplainCommHandler FcommHandler;
+    TwebsocketPlainComm FcommHandler;
   public:
     TwebSocketClientContext(TmenuHandle* _ds, TstringStreamBuffer& _buffer, 
       AsyncWebSocketClient* _client) 
@@ -15,7 +92,7 @@ class TwebSocketClientContext : public TstringStream{
       , Fclient(_client)
       , FcommHandler(_ds,this)
     {
-    }    
+    } 
 
     bool isClient(AsyncWebSocketClient* _client) { return _client == Fclient; }
     bool hasSameIp(AsyncWebSocketClient* _client) { 
@@ -32,22 +109,27 @@ class TwebSocketClientContext : public TstringStream{
       Fclient = nullptr;
     }
 
+	bool connected(){
+		if (!Fclient) return false;
+		return Fclient->status() == WS_CONNECTED;
+	}
+
     void sendMessage(const char* _msg){
-      if (Fclient) Fclient->text(_msg);
+		if (Fclient) Fclient->text(_msg);
     }
 
     void doOnConnect(AsyncWebSocketClient* _client){
       //Serial.println("TwebSocketClientContext.doConnect");
       Fclient = _client;
-      //tell plainCommHandler to manage stuff
+			FcommHandler.signal();
     }
 
-    void handleMessage(const char* _msg){
-      FcommHandler.handleMessage(_msg);
+    void handleMessage(const char* _msg, size_t _len){
+		TsubStringRef msg(_msg,_len);
+		FcommHandler.handleMessage(msg);
     }
 
     void flush() override { 
-      //Serial.println("Commhandler wants to send data");
       sendMessage(data());
       TstringStream::clear();
     }
@@ -58,11 +140,14 @@ typedef TwebSocketClientContext* TpWebSocketClientContext;
 class TwebSocket : public AsyncWebSocket{
   private:
     static const int MAX_CLIENTS = 4;
-    
-    //shared buffer for all clients, as we know we use it one at a time
+
+	//shared buffer for all clients, as we know we use it one at a time
     TmenuHandle* Fds;
     TstringStreamBuffer Fbuffer;
     TwebSocketClientContext* FclientContexts[MAX_CLIENTS];
+#if SDDS_WEBSPIKE_SYNC
+	TwebSpikeQ FmessageQ;
+#endif
 
   public:
    void init(TwebServer& _server);
@@ -74,6 +159,11 @@ class TwebSocket : public AsyncWebSocket{
       for (auto i=0; i<MAX_CLIENTS; i++){ FclientContexts[i] = nullptr; }
       //init(_server);
       //Fbuffer = makeBuffer(1024);
+#if SDDS_WEBSPIKE_SYNC
+		on(FmessageQ.SyncEvent){ 
+			onEventSynced();
+		};
+#endif
     }
 
   private:
@@ -87,6 +177,15 @@ class TwebSocket : public AsyncWebSocket{
       }
       return nullptr;
     }
+
+	void closeIdleClients(){
+		for (auto i=0; i<MAX_CLIENTS; i++){ 
+			TwebSocketClientContext* ctx = FclientContexts[i];
+			if (!ctx) continue; 
+			if (ctx->connected()) continue;
+			ctx->doOnDisconnect();
+		}
+	}
 
     TpWebSocketClientContext findClientCtxByIp(AsyncWebSocketClient* _client){      
       for (auto i=0; i<MAX_CLIENTS; i++){ 
@@ -113,7 +212,7 @@ class TwebSocket : public AsyncWebSocket{
         //slot in context array available?
         if (!ctx) {
           ctx = new TwebSocketClientContext(Fds,Fbuffer,_client);
-          if (ctx == nullptr) return rejectClient(_client,"E 100 no memory");
+          if (ctx == nullptr) return rejectClient(_client,"E 0 100 no memory");
           FclientContexts[i]=ctx;
           return ctx;
         };
@@ -122,56 +221,50 @@ class TwebSocket : public AsyncWebSocket{
         if (!ctx->inUse()) return ctx;
       }
 
-      return rejectClient(_client,"E 100 maximum number of clients exeeded");
+      return rejectClient(_client,"E 0 100 maximum number of clients exeeded");
     }
 
-    void doOnClientConnect(AsyncWebSocketClient* _client){
-      //Serial.printf("TwebSocket.onEvent client #%u connected from %s\n", _client->id(), _client->remoteIP().toString().c_str());
+	void doOnClientConnect(AsyncWebSocketClient* _client){		
+		//Serial.printf("TwebSocket.onEvent client #%u connected from %s\n", _client->id(), _client->remoteIP().toString().c_str());
 
-      if (findClientCtx(_client)){
-        //check the ip!?
-        //Serial.println("client alredy exists....");
-        return;
-      }
+		closeIdleClients();
 
-      //allow to connect the same ip multiple times???
-      if (findClientCtxByIp(_client)){
-        //Serial.println("client with this ip alredy connected....");
-        //return;
-      }
+		if (findClientCtx(_client)){
+			//check the ip!?
+			//Serial.println("client alredy exists....");
+			return;
+		}
 
-      auto ctx = allocateClientContext(_client);
-      if (ctx) ctx->doOnConnect(_client);
-    }
+		//allow to connect the same ip multiple times???
+		if (findClientCtxByIp(_client)){
+			//Serial.println("client with this ip alredy connected....");
+			return;
+		}
+
+		auto ctx = allocateClientContext(_client);
+		if (ctx) ctx->doOnConnect(_client);
+	}
 
     void doOnClientDisconnect(AsyncWebSocketClient* _client){
-      //Serial.printf("TwebSocket.onEvent client #%u disconnected\n", _client->id());
-      TpWebSocketClientContext ctx = findClientCtx(_client);
-      if (ctx) ctx->doOnDisconnect();
+		//Serial.printf("TwebSocket.onEvent client #%u disconnected\n", _client->id());
+		TpWebSocketClientContext ctx = findClientCtx(_client);
+		if (ctx) ctx->doOnDisconnect();
+		closeIdleClients();
     }
 
     void handleWebSocketMessage(AsyncWebSocketClient *client, void *arg, uint8_t *data, size_t len) {
       //Serial.println("->handleWebSocketMessage");
       AwsFrameInfo *info = (AwsFrameInfo*)arg;
       if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-        data[len] = 0;
-        char* msg = (char*)data;
-        //Serial.println(msg);
+		char* msg = (char*)data;
+		if (*msg == '0')
+			return;
         auto ctx = findClientCtx(client);
-        if (ctx) ctx->handleMessage(msg);
+        if (ctx) ctx->handleMessage(msg,len);
       }
     }
 
-  public:
-    void _onEvent(AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
-        if (!client) return;
-		
-		/*
-		Serial.print(millis());
-        Serial.print(" in WebSocket.onEvent taskName= ");
-        Serial.println(pcTaskGetName( nullptr ));
-		*/
-		
+	void onEvent(AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
         switch (type) {
           case WS_EVT_CONNECT:
             doOnClientConnect(client);
@@ -182,11 +275,45 @@ class TwebSocket : public AsyncWebSocket{
           case WS_EVT_DATA:
             handleWebSocketMessage(client, arg, data, len);
             break;
+          case WS_EVT_PING:
+			//Serial.println("PING");
+			break;
           case WS_EVT_PONG:
+			//Serial.println("PONG");
+			break;
           case WS_EVT_ERROR:
-            break;
+			//Serial.println("ERROR");
+			break;
       }
-    }
+	}
+
+#if SDDS_WEBSPIKE_SYNC
+	void onEventSynced() {
+		//Serial.print(" in syncEvent taskName= ");
+		//Serial.println(pcTaskGetName( nullptr ));
+		while(FmessageQ.hasData()){
+			auto d = FmessageQ.read();
+			auto c = client(d.clientId);
+			if (c){
+				onEvent(c,d.type,d.arg(),d.data(),d.len());
+			}
+		}
+	}
+#endif
+
+  public:
+    void _onEvent(AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+        if (!client) return;
+
+#if SDDS_WEBSPIKE_SYNC
+		//Serial.print(" in WebSocket.onEvent taskName= ");
+    	//Serial.println(pcTaskGetName( nullptr ));
+		TwsEvent ws(client,type,arg,data,len);
+		FmessageQ.write(&ws);
+#else
+		onEvent(client,type,arg,data,len);
+#endif
+	}
 };
 
 class TwebSpike : public Tthread{
@@ -209,7 +336,11 @@ class TwebSpike : public Tthread{
       without the next line we got some strange errors and reboots in some cases:
           assert failed: tcpip_api_call IDF/components/lwip/lwip/src/api/tcpip.c:497 (Invalid mbox)
       */
-      esp_netif_init();
+	#if defined(ESP32)
+		esp_netif_init();
+	#elif defined(ESP8266)
+		netif_init();
+	#endif
       begin();
     }
 
