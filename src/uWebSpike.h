@@ -259,6 +259,10 @@ class TwebSocket : public AsyncWebSocket{
 		char* msg = (char*)data;
 		if (*msg == '0')
 			return;
+#if !SDDS_WEBSPIKE_SYNC
+		//fix this somewhen!!! msg[len] ist out of bounds!!!
+		msg[len] = 0;
+#endif
         auto ctx = findClientCtx(client);
         if (ctx) ctx->handleMessage(msg,len);
       }
