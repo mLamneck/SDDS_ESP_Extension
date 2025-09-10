@@ -23,17 +23,15 @@ sdds_enum(connect,waitConnect,connected,fallback) TwifiStatus;
 class TwifiManager : public TmenuHandle{
     Ttimer timer;
     public:
-        sdds_struct(
-            sdds_var(TwifiAction,action)
-            sdds_var(TwifiStatus,status,sdds::opt::readonly)
-            sdds_var(Tuint8,checkCnt,sdds::opt::readonly);
-            sdds_var(TwifiMode,currMode,sdds::opt::readonly)
-            sdds_var(TwifiMode,mode)
-            sdds_var(Tstring,ip,sdds::opt::readonly)
-            sdds_var(Tstring,ssid,sdds::opt::saveval)
-            sdds_var(Tstring,password,sdds::opt::saveval)
-            sdds_var(Tstring,hostname,sdds::opt::saveval)
-        )
+		sdds_var(TwifiAction,action)
+		sdds_var(TwifiStatus,status,sdds::opt::readonly)
+		sdds_var(Tuint8,checkCnt,sdds::opt::readonly)
+		sdds_var(TwifiMode,currMode,sdds::opt::readonly)
+		sdds_var(TwifiMode,mode,sdds::opt::saveval)
+		sdds_var(Tstring,ip,sdds::opt::readonly)
+		sdds_var(Tstring,ssid,sdds::opt::saveval)
+		sdds_var(Tstring,password,sdds::opt::saveval)
+		sdds_var(Tstring,hostname,sdds::opt::saveval)
 
     protected:
         void createAP(const char* _ssid, const char* _pw){
